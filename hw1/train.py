@@ -32,16 +32,19 @@ def setup_dataloader(args):
 
     # Hint: use the helper functions provided in utils.py
     # ===================================================== #
-    train_data, val_data =  read_episodes(args.in_data_fn)
-    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size=10000)
+    train_data, val_data =  read_episodes(file)
+    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 1000)
     actions_to_index, index_to_actions, targets_to_index, index_to_targets = build_output_tables(train_data)
     train_data = flatten_list(train_data)
     val_data = flatten_list(val_data)
-    train_np_x, train_np_y1, train_np_y2 =  encode_data(train_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
-    train_dataset = TensorDataset(torch.from_numpy(train_np_x), torch.from_numpy(train_np_y1), torch.from_numpy(train_np_y2))
-    val_np_x, val_np_y1, val_np_y2 = encode_data(val_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
-    val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y1), torch.from_numpy(val_np_y2))
-
+    #train_np_x, train_np_y1, train_np_y2 =  encode_data(train_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    train_np_x, train_np_y =  encode_data(train_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    #train_dataset = TensorDataset(torch.from_numpy(train_np_x), torch.from_numpy(train_np_y1), torch.from_numpy(train_np_y2))
+    train_dataset = TensorDataset(torch.from_numpy(train_np_x), torch.from_numpy(train_np_y))
+    #val_np_x, val_np_y1, val_np_y2 = encode_data(val_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    val_np_x, val_np_y = encode_data(val_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    #val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y1), torch.from_numpy(val_np_y2))
+    val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y))
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=32)
 
