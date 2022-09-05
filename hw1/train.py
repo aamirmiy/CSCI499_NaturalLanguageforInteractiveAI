@@ -32,8 +32,8 @@ def setup_dataloader(args):
 
     # Hint: use the helper functions provided in utils.py
     # ===================================================== #
-    train_data, val_data =  read_episodes(file)
-    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 1000)
+    train_data, val_data =  read_episodes(args.in_data_fn)
+    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 10000)
     actions_to_index, index_to_actions, targets_to_index, index_to_targets = build_output_tables(train_data)
     train_data = flatten_list(train_data)
     val_data = flatten_list(val_data)
@@ -48,10 +48,10 @@ def setup_dataloader(args):
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=32)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, (actions_to_index, index_to_actions, targets_to_index, index_to_targets)
 
 
-def setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers):
+def setup_model(device, vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers):
     """
     return:
         - model: YourOwnModelClass
@@ -59,7 +59,7 @@ def setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_di
     # ================== TODO: CODE HERE ================== #
     # Task: Initialize your model.
     # ===================================================== #
-    model = semanticNet(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
+    model = semanticNet(device,vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
     return model
 
 
@@ -238,7 +238,8 @@ def main(args):
     loaders = {"train": train_loader, "val": val_loader}
 
     # build model
-    model = setup_model(args, maps, device)
+    #setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
+    model = setup_model(device,10000,len(maps[0]),len(maps[1]),100,100,1)
     print(model)
 
     # get optimizer and loss functions

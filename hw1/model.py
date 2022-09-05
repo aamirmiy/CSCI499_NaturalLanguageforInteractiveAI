@@ -4,8 +4,9 @@ import torch.nn as nn
 
 
 class semanticNet(nn.Module):
-    def __init__(self, vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers): #try with dropout afterwards
+    def __init__(self, device,vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers): #try with dropout afterwards
         super(semanticNet, self).__init__()
+        self.device = device
         self.output_size1 = output_size1 #check this afterwards
         self.output_size2 = output_size2
         self.n_layers = n_layers

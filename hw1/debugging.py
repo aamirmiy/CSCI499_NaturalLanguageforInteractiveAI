@@ -89,5 +89,4 @@ print(f"Feature batch shape: {train_features.size()}")
 print(f"Labels batch shape: {train_labels.size()}")
 label = train_labels[:10,0]
 label1 = train_labels[:10,1]
-print(label)
-print(label1)
+print(train_features)
