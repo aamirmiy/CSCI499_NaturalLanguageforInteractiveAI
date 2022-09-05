@@ -33,7 +33,7 @@ def setup_dataloader(args):
     # Hint: use the helper functions provided in utils.py
     # ===================================================== #
     train_data, val_data =  read_episodes(args.in_data_fn)
-    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 1000)
+    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size=10000)
     actions_to_index, index_to_actions, targets_to_index, index_to_targets = build_output_tables(train_data)
     train_data = flatten_list(train_data)
     val_data = flatten_list(val_data)

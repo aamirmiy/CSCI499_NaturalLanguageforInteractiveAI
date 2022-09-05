@@ -23,6 +23,7 @@ def get_device(force_cpu, status=True):
 
 
 def preprocess_string(s):
+    s=s.lower()
     # Remove all non-word characters (everything except numbers and letters)
     s = re.sub(r"[^\w\s]", "", s)
     # Replace all runs of whitespaces with one space
@@ -37,7 +38,7 @@ def read_episodes(file):
     return data['train'],data['valid_seen']
 
 
-def build_tokenizer_table(train, vocab_size=1000):
+def build_tokenizer_table(train, vocab_size=10000):
     word_list = []
     padded_lens = []
     inst_count = 0
