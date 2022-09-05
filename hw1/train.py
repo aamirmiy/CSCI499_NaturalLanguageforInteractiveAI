@@ -2,14 +2,20 @@ import tqdm
 import torch
 import argparse
 from sklearn.metrics import accuracy_score
+from torch.utils.data import TensorDataset, DataLoader
 
 from utils import (
     get_device,
-    preprocess_string,
+    read_episodes,
+    flatten_list,
     build_tokenizer_table,
     build_output_tables,
+    encode_data
 )
 
+from model import (
+    semanticNet
+)
 
 def setup_dataloader(args):
     """
@@ -26,12 +32,23 @@ def setup_dataloader(args):
 
     # Hint: use the helper functions provided in utils.py
     # ===================================================== #
-    train_loader = None
-    val_loader = None
+    train_data, val_data =  read_episodes(args.in_data_fn)
+    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 1000)
+    actions_to_index, index_to_actions, targets_to_index, index_to_targets = build_output_tables(train_data)
+    train_data = flatten_list(train_data)
+    val_data = flatten_list(val_data)
+    train_np_x, train_np_y1, train_np_y2 =  encode_data(train_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    train_dataset = TensorDataset(torch.from_numpy(train_np_x), torch.from_numpy(train_np_y1), torch.from_numpy(train_np_y2))
+    val_np_x, val_np_y1, val_np_y2 = encode_data(val_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
+    val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y1), torch.from_numpy(val_np_y2))
+
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=32)
+    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=32)
+
     return train_loader, val_loader
 
 
-def setup_model(args):
+def setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers):
     """
     return:
         - model: YourOwnModelClass
@@ -39,7 +56,7 @@ def setup_model(args):
     # ================== TODO: CODE HERE ================== #
     # Task: Initialize your model.
     # ===================================================== #
-    model = None
+    model = semanticNet(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
     return model
 
 
@@ -54,9 +71,9 @@ def setup_optimizer(args, model):
     # Task: Initialize the loss function for action predictions
     # and target predictions. Also initialize your optimizer.
     # ===================================================== #
-    action_criterion = None
-    target_criterion = None
-    optimizer = None
+    action_criterion = torch.nn.CrossEntropyLoss()
+    target_criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
 
     return action_criterion, target_criterion, optimizer
 
@@ -85,7 +102,7 @@ def train_epoch(
     for (inputs, labels) in loader:
         # put model inputs to device
         inputs, labels = inputs.to(device), labels.to(device)
-
+        model.train()
         # calculate the loss and train accuracy and perform backprop
         # NOTE: feel free to change the parameters to the model forward pass here + outputs
         actions_out, targets_out = model(inputs, labels)
