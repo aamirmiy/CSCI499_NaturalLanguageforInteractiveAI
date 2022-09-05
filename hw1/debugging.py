@@ -5,40 +5,6 @@ from sklearn.metrics import accuracy_score
 from torch.utils.data import TensorDataset, DataLoader
 
 
-class BookIdet(torch.nn.Module):
-    def __init__(
-        self,
-        device,
-        vocab_size,
-        input_len,
-        n_books,
-        embedding_dim
-    ):
-        super(BookIdet, self).__init__()
-        self.device = device
-        self.embedding_dim = embedding_dim
-        self.vocab_size = vocab_size
-        self.input_len = input_len
-        self.n_books = n_books
-
-        # embedding layer
-        self.embedding = torch.nn.Embedding(vocab_size, embedding_dim, padding_idx=0)
-
-        # maxpool layer
-        self.maxpool = torch.nn.MaxPool2d((input_len, 1), ceil_mode=True)
-
-        # linear layer
-        self.fc = torch.nn.Linear(embedding_dim, n_books)
-
-    def forward(self, x):
-        batch_size, seq_len = x.size(0), x.size(1)
-
-        embeds = self.embedding(x)
-        maxpooled_embeds = self.maxpool(embeds)
-        out = self.fc(maxpooled_embeds).squeeze(1)  # squeeze out the singleton length dimension that we maxpool'd over
-        
-        return out
-
 from utils import (
     get_device,
     read_episodes,
@@ -64,7 +30,7 @@ def setup_dataloader(file):
     # Hint: use the helper functions provided in utils.py
     # ===================================================== #
     train_data, val_data =  read_episodes(file)
-    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 1000)
+    vocab_to_index, index_to_vocab, len_cutoff = build_tokenizer_table(train_data, vocab_size = 10000)
     actions_to_index, index_to_actions, targets_to_index, index_to_targets = build_output_tables(train_data)
     train_data = flatten_list(train_data)
     val_data = flatten_list(val_data)

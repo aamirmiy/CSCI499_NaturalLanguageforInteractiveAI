@@ -239,7 +239,7 @@ def main(args):
 
     # build model
     #setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
-    model = setup_model(device,10000,len(maps[0]),len(maps[1]),100,100,1)
+    model = setup_model(device,10000,len(maps[0]),len(maps[2]),100,100,1)
     print(model)
 
     # get optimizer and loss functions
