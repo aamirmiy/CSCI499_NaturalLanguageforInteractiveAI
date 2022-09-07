@@ -100,14 +100,14 @@ def encode_data(flat_data, v2i, seq_len, t2i, a2i):
     n_action_class = len(a2i)
     x = np.zeros((n_lines, seq_len), dtype = np.int32)
     y = np.zeros((n_lines,2), dtype = np.int32)
-    #y1 = np.zeros((n_lines), dtype=np.int32)
-    #y2 = np.zeros((n_lines), dtype=np.int32)
     
     idx=0
     n_early_cutoff = 0
     n_unks = 0
     n_tks = 0
-    for instruction, classes in flat_data:
+    for lines in flat_data:
+        instruction = lines[0]
+        classes = lines[1]
         instruction = preprocess_string(instruction)
         x[idx][0] = v2i["<start>"]
         jdx=1
@@ -123,8 +123,6 @@ def encode_data(flat_data, v2i, seq_len, t2i, a2i):
         x[idx][jdx] = v2i["<end>"]
         y[idx][0] = a2i[classes[0]]
         y[idx][1] = t2i[classes[1]]
-        #y1[idx] = a2i[classes[0]]
-        #y2[idx] = t2i[classes[1]]
         idx += 1
     print("INFO: had to represent %d/%d (%.4f) tokens as unk with vocab limit %d"
     % (n_unks, n_tks, n_unks / n_tks, len(v2i)))

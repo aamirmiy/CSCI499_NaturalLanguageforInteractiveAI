@@ -1,50 +1,38 @@
-# IMPLEMENT YOUR MODEL CLASS HERE
-import torch
 import torch.nn as nn
-
 
 class semanticNet(nn.Module):
     def __init__(self, device,vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers): #try with dropout afterwards
         super(semanticNet, self).__init__()
         self.device = device
-        self.output_size1 = output_size1 #check this afterwards
-        self.output_size2 = output_size2
+        self.vocab_size = vocab_size
+        self.output_size1 = output_size1 #number of classes in actions
+        self.output_size2 = output_size2 #number of classes in targets
+        self.embedding_dim = embedding_dim
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
 
+        #model architecture
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, batch_first=True)
         self.fc1 = nn.Linear(hidden_dim, output_size1)
         self.fc2 = nn.Linear(hidden_dim, output_size2)
-        #self.softmax = nn.Softmax()
 
-    def forward(self, x, hidden):
-        batch_size = x.size(0)
-        x = x.long()
-        embeds = self.embedding(x)
-        lstm_out, hidden = self.lstm(embeds, hidden)
-        lstm_out = lstm_out.contiguous().view(-1, self.hidden_dim)
 
-        #out = self.dropout(lstm_out)
-        out1 = self.fc1(lstm_out)
-        out2 = self.fc2(lstm_out)
-        #output1 = self.softmax(out1)
-        #output2 = self.softmax(out2)
-        out1 = out1.view(batch_size, -1)
-        out1 = out1[:,-1]
-        out2 = out2.view(batch_size, -1)
-        out2 = out2[:,-1]
-        # output1 = output1.view(batch_size, -1)
-        # output1 = output1[:,-1]
-        # output2 = output2.view(batch_size, -1)
-        # output2 = output2[:,-1]
-        return out1, out2
-    
-    # def init_hidden(self,batch_size):
-    #     weight = next(self.parameters()).data
-    #     hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device),
-    #                   weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
-    #     return hidden
-
+    def forward(self, x):
+        #x is input having shape (batch_size,sequence_length)
         
+        #embedding input = (batch_size, sequence_length)
+        embeds = self.embedding(x)
+        #embedding output =(batch_size,sequence_length,embedding_dim)
+        
+        #lstm_input = (batch_size, sequence_length,embedding_dim)
+        lstm_out, (h0,c0) = self.lstm(embeds)
+        #lstm_out = (batch_size, sequence_length, hidden_dim)
 
+        #h0 = (1, batch_size, hidden_dim)
+ 
+        #fc_input = (batch_size,hidden_dim)     
+        out1 = self.fc1(h0.squeeze(0))
+        out2 = self.fc2(h0.squeeze(0))
+       
+        return out1, out2

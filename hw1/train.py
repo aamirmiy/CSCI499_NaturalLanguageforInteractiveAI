@@ -45,8 +45,8 @@ def setup_dataloader(args):
     val_np_x, val_np_y = encode_data(val_data, vocab_to_index, len_cutoff, targets_to_index, actions_to_index)
     #val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y1), torch.from_numpy(val_np_y2))
     val_dataset = TensorDataset(torch.from_numpy(val_np_x), torch.from_numpy(val_np_y))
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=32)
-    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=32)
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,drop_last=True)
+    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=args.batch_size,drop_last=True)
 
     return train_loader, val_loader, (actions_to_index, index_to_actions, targets_to_index, index_to_targets)
 
@@ -60,6 +60,8 @@ def setup_model(device, vocab_size, output_size1, output_size2, embedding_dim, h
     # Task: Initialize your model.
     # ===================================================== #
     model = semanticNet(device,vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
+    model = model.to(device)
+    
     return model
 
 
@@ -76,7 +78,7 @@ def setup_optimizer(args, model):
     # ===================================================== #
     action_criterion = torch.nn.CrossEntropyLoss()
     target_criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
     return action_criterion, target_criterion, optimizer
 
@@ -99,23 +101,28 @@ def train_epoch(
     target_preds = []
     action_labels = []
     target_labels = []
-
+    
     # iterate over each batch in the dataloader
     # NOTE: you may have additional outputs from the loader __getitem__, you can modify this
     for (inputs, labels) in loader:
         # put model inputs to device
         inputs, labels = inputs.to(device), labels.to(device)
         model.train()
+        
+        
+
         # calculate the loss and train accuracy and perform backprop
         # NOTE: feel free to change the parameters to the model forward pass here + outputs
-        actions_out, targets_out = model(inputs, labels)
+        actions_out, targets_out= model(inputs)
+      
+    
 
         # calculate the action and target prediction loss
         # NOTE: we assume that labels is a tensor of size Bx2 where labels[:, 0] is the
         # action label and labels[:, 1] is the target label
         action_loss = action_criterion(actions_out.squeeze(), labels[:, 0].long())
         target_loss = target_criterion(targets_out.squeeze(), labels[:, 1].long())
-
+        
         loss = action_loss + target_loss
 
         # step optimizer and compute gradients during training
@@ -231,6 +238,7 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
 
 
 def main(args):
+    
     device = get_device(args.force_cpu)
 
     # get dataloaders
@@ -239,9 +247,10 @@ def main(args):
 
     # build model
     #setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
-    model = setup_model(device,10000,len(maps[0]),len(maps[2]),100,100,1)
+    model = setup_model(device,2063,len(maps[0]),len(maps[2]),100,128,1)
+    
     print(model)
-
+    #model.to(device)
     # get optimizer and loss functions
     action_criterion, target_criterion, optimizer = setup_optimizer(args, model)
 
