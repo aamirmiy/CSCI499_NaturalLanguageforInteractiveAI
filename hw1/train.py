@@ -3,6 +3,7 @@ import torch
 import argparse
 from sklearn.metrics import accuracy_score
 from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
 
 from utils import (
     get_device,
@@ -181,6 +182,16 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
     # weights via backpropagation
     model.train()
 
+    train_action_losses=[]
+    train_target_losses=[]
+    train_action_accuracy=[]
+    train_target_accuracy=[]
+
+    val_action_losses = []
+    val_target_losses =[]
+    val_action_accuracy = []
+    val_target_accuracy = []
+
     for epoch in tqdm.tqdm(range(args.num_epochs)):
 
         # train single epoch
@@ -207,6 +218,10 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
         print(
             f"train action acc : {train_action_acc} | train target acc: {train_target_acc}"
         )
+        train_action_losses.append(train_action_loss)
+        train_target_losses.append(train_target_loss)
+        train_action_accuracy.append(train_action_acc)
+        train_target_accuracy.append(train_target_acc)
 
         # run validation every so often
         # during eval, we run a forward pass through the model and compute
@@ -228,6 +243,10 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
             print(
                 f"val action acc : {val_action_acc} | val target losaccs: {val_target_acc}"
             )
+            val_action_losses.append(val_action_loss)
+            val_target_losses.append(val_target_loss)
+            val_action_accuracy.append(val_action_acc)
+            val_target_accuracy.append(val_target_acc)
 
     # ================== TODO: CODE HERE ================== #
     # Task: Implement some code to keep track of the model training and
@@ -235,7 +254,26 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
     # 4 figures for 1) training loss, 2) training accuracy,
     # 3) validation loss, 4) validation accuracy
     # ===================================================== #
-
+    epo = range(1,21)
+    fig, axs = plt.subplots(2, 2)
+    axs[0, 0].plot(epo, val_action_losses, 'b', label='Validation Action Loss')
+    axs[0, 0].plot(epo, train_action_losses,'g',label='Training Action Loss')
+    axs[0, 0].set_title('Training and Validation loss')
+    axs.set(xlabel='Epochs', ylabel='Loss')
+    axs[0, 1].plot(epo, val_target_losses, 'b', label='Validation Target Loss')
+    axs[0, 1].plot(epo, train_target_losses,'g',label='Training Target Loss')
+    axs[0, 1].set_title('Training and Validation loss')
+    axs.set(xlabel='Epochs', ylabel='Loss')
+    axs[1, 0].plot(epo, val_action_accuracy, 'b', label='Validation Action accuracy')
+    axs[1, 0].plot(epo, train_action_accuracy,'g',label='Training Action accuracy')
+    axs[1, 0].set_title('Training and Validation Accuracy')
+    axs.set(xlabel='Epochs', ylabel='Accuracy')
+    axs[1, 1].plot(epo, val_target_accuracy, 'b', label='Validation Target accuracy')
+    axs[1, 1].plot(epo, train_target_accuracy,'g',label='Training Action accuracy')
+    axs[1, 1].set_title('Training and Validation Accuracy')
+    axs.set(xlabel='Epochs', ylabel='Accuracy')
+    
+   
 
 def main(args):
     
