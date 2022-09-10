@@ -52,7 +52,7 @@ def setup_dataloader(args):
     return train_loader, val_loader, (actions_to_index, index_to_actions, targets_to_index, index_to_targets)
 
 
-def setup_model(device, vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers):
+def setup_model(args,device, vocab_size, output_size1, output_size2):
     """
     return:
         - model: YourOwnModelClass
@@ -60,7 +60,7 @@ def setup_model(device, vocab_size, output_size1, output_size2, embedding_dim, h
     # ================== TODO: CODE HERE ================== #
     # Task: Initialize your model.
     # ===================================================== #
-    model = semanticNet(device,vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
+    model = semanticNet(device,vocab_size, output_size1, output_size2, args.emb_dim, args.lstm_dim, args.num_layers)
     model = model.to(device)
     
     return model
@@ -247,6 +247,11 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
             val_target_losses.append(val_target_loss)
             val_action_accuracy.append(val_action_acc)
             val_target_accuracy.append(val_target_acc)
+        else:
+            val_action_losses.append(val_action_losses[-1])
+            val_target_losses.append(val_target_losses[-1])
+            val_action_accuracy.append(val_action_accuracy[-1])
+            val_target_accuracy.append(val_target_accuracy[-1])
 
     # ================== TODO: CODE HERE ================== #
     # Task: Implement some code to keep track of the model training and
@@ -254,24 +259,25 @@ def train(args, model, loaders, optimizer, action_criterion, target_criterion, d
     # 4 figures for 1) training loss, 2) training accuracy,
     # 3) validation loss, 4) validation accuracy
     # ===================================================== #
-    epo = range(1,21)
-    fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(epo, val_action_losses, 'b', label='Validation Action Loss')
-    axs[0, 0].plot(epo, train_action_losses,'g',label='Training Action Loss')
-    axs[0, 0].set_title('Training and Validation loss')
-    axs.set(xlabel='Epochs', ylabel='Loss')
-    axs[0, 1].plot(epo, val_target_losses, 'b', label='Validation Target Loss')
-    axs[0, 1].plot(epo, train_target_losses,'g',label='Training Target Loss')
-    axs[0, 1].set_title('Training and Validation loss')
-    axs.set(xlabel='Epochs', ylabel='Loss')
-    axs[1, 0].plot(epo, val_action_accuracy, 'b', label='Validation Action accuracy')
-    axs[1, 0].plot(epo, train_action_accuracy,'g',label='Training Action accuracy')
-    axs[1, 0].set_title('Training and Validation Accuracy')
-    axs.set(xlabel='Epochs', ylabel='Accuracy')
-    axs[1, 1].plot(epo, val_target_accuracy, 'b', label='Validation Target accuracy')
-    axs[1, 1].plot(epo, train_target_accuracy,'g',label='Training Action accuracy')
-    axs[1, 1].set_title('Training and Validation Accuracy')
-    axs.set(xlabel='Epochs', ylabel='Accuracy')
+    fig, axs = plt.subplots(2, 2,figsize=(10,8))
+    axs[0, 0].plot(val_action_losses, 'b', label='Validation Action Loss')
+    axs[0, 0].plot(train_action_losses,'g',label='Training Action Loss')
+    axs[0, 0].set_title('Action loss')
+    #axs.set(xlabel='Epochs', ylabel='Loss')
+    axs[0, 1].plot(val_target_losses, 'b', label='Validation Target Loss')
+    axs[0, 1].plot(train_target_losses,'g',label='Training Target Loss')
+    axs[0, 1].set_title('Target loss')
+    #axs.set(xlabel='Epochs', ylabel='Loss')
+    axs[1, 0].plot(val_action_accuracy, 'b', label='Validation Action accuracy')
+    axs[1, 0].plot(train_action_accuracy,'g',label='Training Action accuracy')
+    axs[1, 0].set_title('Action Accuracy')
+    #axs.set(xlabel='Epochs', ylabel='Accuracy')
+    axs[1, 1].plot(val_target_accuracy, 'b', label='Validation Target accuracy')
+    axs[1, 1].plot(train_target_accuracy,'g',label='Training Action accuracy')
+    axs[1, 1].set_title('Target Accuracy')
+    #axs.set(xlabel='Epochs', ylabel='Accuracy')
+    fig.tight_layout()
+    plt.show()
     
    
 
@@ -285,7 +291,7 @@ def main(args):
 
     # build model
     #setup_model(vocab_size, output_size1, output_size2, embedding_dim, hidden_dim, n_layers)
-    model = setup_model(device,2063,len(maps[0]),len(maps[2]),100,128,1)
+    model = setup_model(args,device,2063,len(maps[0]),len(maps[2]))
     
     print(model)
     #model.to(device)
@@ -323,7 +329,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--val_every", default=5, help="number of epochs between every eval loop"
     )
-
+    parser.add_argument(
+      "--emb_dim", default = 100, help=" specify the embedding dimension"
+    )
+    parser.add_argument(
+      "--lstm_dim", default = 128, help=" sepcify lstm dimension (hidden size)"
+    )
+    parser.add_argument(
+      "--num_layers", default = 1, help="specify number of lstm layers"
+    )
     # ================== TODO: CODE HERE ================== #
     # Task (optional): Add any additional command line
     # parameters you may need here
