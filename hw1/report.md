@@ -86,7 +86,7 @@ The baseline model after hyperparameter tuning has the following parameters.
   </tr>
 </table></ul>
 <ul><strong>Plots</strong></ul>
-<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/embedding 100d 128 lstm.png"></ul>
+<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="embedding 100d 128 lstm.png"></ul>
 <ul>Plot for pretrained embeddings of 300 dimensions with 128 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/embedding 300d lstm 128.png"></ul>
 <ul>Plot for pretrained embeddings of 300 dimensions with 256 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/300 embedding 256 lstm.png"></ul><br>
 <b>Legend</b>:<br>
