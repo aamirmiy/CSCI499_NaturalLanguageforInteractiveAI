@@ -22,8 +22,8 @@ The baseline model after hyperparameter tuning has the following parameters.
 <ul>With respect to the ACTION class, the validation and train accuracy are almost the same i.e. around 98%-99% irrespective of change in parameters.</ul>
 <br>
 <ul><b>Plots</b></ul>
-<ul>Plot for baseline model</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/plot with 128 lstm .png" ></ul>
-<ul>Plot with lstm having hidden size of 256</ul><img src = "/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/plot with 256 lstm.png"></ul>
+<ul>Plot for baseline model</ul><img src="plot with 128 lstm .png" ></ul>
+<ul>Plot with lstm having hidden size of 256</ul><img src ="plot with 256 lstm.png"></ul>
 <br></br>
 <b>Legend</b>:<br>
 <b>Green = Train</b>
@@ -33,7 +33,7 @@ The baseline model after hyperparameter tuning has the following parameters.
 <h2>Notes</h2>
 <ul>This code was run on google colab gpu <strong>(Tesla P100)</strong></ul>
 <ul>The model was trained for <b>20</b> epochs with validation every <b>5</b> epochs</ul>
-<ul>The batch size used was <b>64</b>. Going above 64 resulted in reduced accuracy</ul>
+<ul>The batch size used was <b>64</b>. Going above 64 resulted in reduced train and validation target accuracy</ul>
 <ul> All the parameters and hyperparameters were chosen based on experimentation</ul>
 <hr>
 <h2>Bonus Task</h2>
@@ -86,14 +86,27 @@ The baseline model after hyperparameter tuning has the following parameters.
   </tr>
 </table></ul>
 <ul><strong>Plots</strong></ul>
-<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/embedding 100d 128 lstm.png"></ul>
-<ul>Plot for pretrained embeddings of 300 dimensions with 128 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/embedding 300d lstm 128.png"></ul>
-<ul>Plot for pretrained embeddings of 300 dimensions with 256 LSTM hidden size</ul><img src="/home/aamirmiy/CSCI499_NaturalLanguageforInteractiveAI/hw1/300 embedding 256 lstm.png"></ul><br>
+<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="embedding 100d 128 lstm.png"></ul>
+<ul>Plot for pretrained embeddings of 300 dimensions with 128 LSTM hidden size</ul><img src="embedding 300d lstm 128.png"></ul>
+<ul>Plot for pretrained embeddings of 300 dimensions with 256 LSTM hidden size</ul><img src="300 embedding 256 lstm.png"></ul><br>
 <b>Legend</b>:<br>
 <b>Green = Train</b>
 <b>Blue = Validation</b>
 <br></br>
 <ul>The results were calculated over 20 epochs of training with validation after every 5 epochs.</ul>
 <hr>
+<h2>Running the code</h2>
 
+Train:
+python train.py 
+    --in_data_fn=lang_to_sem_data.json  
+    --model_output_dir=experiments/lstm  
+    --batch_size=1000  
+    --num_epochs=100  
+    --val_every=5  
+    --force_cpu  
+    --emb_dim=100  
+    --lstm_dim=128 
+    --num_layers=1 
+ 
 
