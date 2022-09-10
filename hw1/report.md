@@ -33,7 +33,7 @@ The baseline model after hyperparameter tuning has the following parameters.
 <h2>Notes</h2>
 <ul>This code was run on google colab gpu <strong>(Tesla P100)</strong></ul>
 <ul>The model was trained for <b>20</b> epochs with validation every <b>5</b> epochs</ul>
-<ul>The batch size used was <b>64</b>. Going above 64 resulted in reduced accuracy</ul>
+<ul>The batch size used was <b>64</b>. Going above 64 resulted in reduced train and validation target accuracy</ul>
 <ul> All the parameters and hyperparameters were chosen based on experimentation</ul>
 <hr>
 <h2>Bonus Task</h2>
