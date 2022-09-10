@@ -108,4 +108,5 @@ python train.py \
     --emb_dim=100 \
     --lstm_dim=128\
     --num_layers=1
+ ```
 
