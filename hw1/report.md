@@ -22,8 +22,8 @@ The baseline model after hyperparameter tuning has the following parameters.
 <ul>With respect to the ACTION class, the validation and train accuracy are almost the same i.e. around 98%-99% irrespective of change in parameters.</ul>
 <br>
 <ul><b>Plots</b></ul>
-<ul>Plot for baseline model</ul><img src="plot with 128 lstm .png" ></ul>
-<ul>Plot with lstm having hidden size of 256</ul><img src ="plot with 256 lstm.png"></ul>
+<ul>Plot for baseline model</ul><img src="/images/plot with 128 lstm .png" ></ul>
+<ul>Plot with lstm having hidden size of 256</ul><img src ="/images/plot with 256 lstm.png"></ul>
 <br></br>
 <b>Legend</b>:<br>
 <b>Green = Train</b>
@@ -86,9 +86,9 @@ The baseline model after hyperparameter tuning has the following parameters.
   </tr>
 </table></ul>
 <ul><strong>Plots</strong></ul>
-<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="embedding 100d 128 lstm.png"></ul>
-<ul>Plot for pretrained embeddings of 300 dimensions with 128 LSTM hidden size</ul><img src="embedding 300d lstm 128.png"></ul>
-<ul>Plot for pretrained embeddings of 300 dimensions with 256 LSTM hidden size</ul><img src="300 embedding 256 lstm.png"></ul><br>
+<ul>Plot for pretrained embeddings of 100 dimensions with 128 LSTM hidden size</ul><img src="/images/embedding 100d 128 lstm.png"></ul>
+<ul>Plot for pretrained embeddings of 300 dimensions with 128 LSTM hidden size</ul><img src="/images/embedding 300d lstm 128.png"></ul>
+<ul>Plot for pretrained embeddings of 300 dimensions with 256 LSTM hidden size</ul><img src="/images/300 embedding 256 lstm.png"></ul><br>
 <b>Legend</b>:<br>
 <b>Green = Train</b>
 <b>Blue = Validation</b>
