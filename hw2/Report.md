@@ -45,11 +45,15 @@ Analogy task evaluation
 
 
 ## Analysis (Contains bonus task as well where context window of 2 is compared with context window of 4)  
-1. The metrics used here are Mean Rank Reciprocal and Mean Rank. The Mean Reciprocal rank is a statistic measure for evaluating any process that produces a list of possible responses to a sample of queries. Higher it is the better.  Mean Rank is the mean of the ranks of all the predictions that are closest to the correct answer. Lower the score better the performance.
-   
-2. Taking a look at the results we see that the metrics when context window is 2 are better than when context window is 4. This maybe because the number of epochs are same and for the same number of epochs learning with context window 2 is faster than with a window of 4 . The performance may increase if number of epochs are increased.
+1. The in vivo tasks contains two types of evaluations-   
+    i. Semantic analysis - This shows how similar two words are in terms of their meaning according in a specific context/relation. For example names of two cities.  
+    ii. Syntactic analysis - This shows how two words are similar to each other in terms of grammar.  
 
-3. Comparing semantic tasks vs syntactic tasks:  
+2. The metrics used here are Mean Rank Reciprocal and Mean Rank. The Mean Reciprocal rank is a statistic measure for evaluating any process that produces a list of possible responses to a sample of queries. Higher it is the better.  Mean Rank is the mean of the ranks of all the predictions that are closest to the correct answer. Lower the score better the performance.
+   
+3. Taking a look at the results we see that the metrics when context window is 2 are better than when context window is 4. This maybe because the number of epochs are same and for the same number of epochs learning with context window 2 is faster than with a window of 4 . The performance may increase if number of epochs are increased.
+
+4. Comparing semantic tasks vs syntactic tasks:  
 For both scenarios, model performance on syntactic tasks is superior to semantic tasks.
 
 
