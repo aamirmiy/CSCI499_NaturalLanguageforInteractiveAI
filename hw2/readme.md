@@ -31,7 +31,7 @@ Analogy task evaluation
 <img src = "images/analogy_task context=4.png"> 
 Words not found ->  minister and slaves
 
-2. With context = 4 and batch size = 256 and embedding = 128 
+2. With context = 4 and batch size = 256 and embedding = 128   
 Analogy task evaluation  
 <img src = "images/analogy_task embedding=128.png"> 
 
