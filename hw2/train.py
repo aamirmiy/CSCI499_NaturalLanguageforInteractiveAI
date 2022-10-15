@@ -3,11 +3,13 @@ import os
 import tqdm
 import torch
 from sklearn.metrics import accuracy_score
-
+from torch.utils.data import TensorDataset, DataLoader
 from eval_utils import downstream_validation
+from model import CBOW_Model
 import utils
-import data_utils
-
+from data_utils import *
+from functools import partial
+import matplotlib.pyplot as plt
 
 def setup_dataloader(args):
     """
@@ -17,21 +19,27 @@ def setup_dataloader(args):
     """
 
     # read in training data from books dataset
-    sentences = data_utils.process_book_dir(args.books_dir)
+    sentences = process_book_dir(args.books_dir)
 
     # build one hot maps for input and output
     (
         vocab_to_index,
         index_to_vocab,
         suggested_padding_len,
-    ) = data_utils.build_tokenizer_table(sentences, vocab_size=args.vocab_size)
+    ) = build_tokenizer_table(sentences, vocab_size=args.vocab_size)
 
     # create encoded input and output numpy matrices for the entire dataset and then put them into tensors
-    encoded_sentences, lens = data_utils.encode_data(
+    encoded_sentences, lens = encode_data(
         sentences,
         vocab_to_index,
         suggested_padding_len,
     )
+    
+    train, val = train_val_split(encoded_sentences)
+    
+    
+
+    
 
     # ================== TODO: CODE HERE ================== #
     # Task: Given the tokenized and encoded text, you need to
@@ -44,10 +52,10 @@ def setup_dataloader(args):
     # (you can use utils functions) and create respective
     # dataloaders.
     # ===================================================== #
-
-    train_loader = None
-    val_loader = None
-    return train_loader, val_loader
+    
+    train_loader = DataLoader(train, shuffle=True, batch_size=args.batch_size,drop_last=True,collate_fn=partial(collate_cbow,CBOW_N_WORDS=4,MAX_SEQUENCE_LENGTH=suggested_padding_len))
+    val_loader = DataLoader(val, shuffle=True, batch_size=args.batch_size,drop_last=True,collate_fn=partial(collate_cbow,CBOW_N_WORDS=4,MAX_SEQUENCE_LENGTH=suggested_padding_len))
+    return train_loader, val_loader, index_to_vocab
 
 
 def setup_model(args):
@@ -58,7 +66,7 @@ def setup_model(args):
     # ================== TODO: CODE HERE ================== #
     # Task: Initialize your CBOW or Skip-Gram model.
     # ===================================================== #
-    model = None
+    model = CBOW_Model(args.vocab_size,args.embedding_dim)
     return model
 
 
@@ -72,8 +80,8 @@ def setup_optimizer(args, model):
     # Task: Initialize the loss function for predictions. 
     # Also initialize your optimizer.
     # ===================================================== #
-    criterion = None
-    optimizer = None
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     return criterion, optimizer
 
 
@@ -87,6 +95,7 @@ def train_epoch(
     training=True,
 ):
     model.train()
+    
     epoch_loss = 0.0
 
     # keep track of the model predictions for computing accuracy
@@ -101,7 +110,9 @@ def train_epoch(
 
         # calculate the loss and train accuracy and perform backprop
         # NOTE: feel free to change the parameters to the model forward pass here + outputs
-        pred_logits = model(inputs, labels)
+        
+        #pred_logits = model(inputs, labels)
+        pred_logits = model(inputs)
 
         # calculate prediction loss
         loss = criterion(pred_logits.squeeze(), labels)
@@ -158,15 +169,21 @@ def main(args):
         return
 
     # get dataloaders
-    train_loader, val_loader = setup_dataloader(args)
+    train_loader, val_loader, i2v = setup_dataloader(args)
     loaders = {"train": train_loader, "val": val_loader}
 
     # build model
     model = setup_model(args)
+    model=model.to(device)
     print(model)
 
     # get optimizer
     criterion, optimizer = setup_optimizer(args, model)
+    
+    loss = []
+    acc = []
+    v_loss = []
+    v_acc = []
 
     for epoch in range(args.num_epochs):
         # train model for a single epoch
@@ -181,6 +198,8 @@ def main(args):
         )
 
         print(f"train loss : {train_loss} | train acc: {train_acc}")
+        loss.append(train_loss)
+        acc.append(train_acc)
 
         if epoch % args.val_every == 0:
             val_loss, val_acc = validate(
@@ -192,7 +211,8 @@ def main(args):
                 device,
             )
             print(f"val loss : {val_loss} | val acc: {val_acc}")
-
+            v_loss.append(val_loss)
+            v_acc.append(val_acc)
             # ======================= NOTE ======================== #
             # Saving the word vectors to disk and running the eval
             # can be costly when you do it multiple times. You could
@@ -209,18 +229,38 @@ def main(args):
 
             # evaluate learned embeddings on a downstream task
             downstream_validation(word_vec_file, external_val_analogies)
+        else:
+            v_loss.append(v_loss[-1])
+            v_acc.append(v_acc[-1])
 
 
         if epoch % args.save_every == 0:
-            ckpt_file = os.path.join(args.output_dir, "model.ckpt")
+            ckpt_file = os.path.join(args.outputs_dir, "model.ckpt")
             print("saving model to ", ckpt_file)
             torch.save(model, ckpt_file)
+        
+    fig, axs = plt.subplots(2,2,figsize=(10,8))
+    axs[0,0].plot(v_loss, 'b', label = "Validation Loss")
+    axs[0,0].set_title('Validation Loss')
+    axs[0, 1].plot(loss,'g',label='Training Loss')
+    axs[0, 1].set_title('Train loss')
+    #axs.set(xlabel='Epochs', ylabel='Loss')
+    axs[1, 0].plot(v_acc, 'b', label='Validation accuracy')
+    axs[1, 0].set_title('Validation Accuracy')
+    #axs.set(xlabel='Epochs', ylabel='Accuracy')
+    axs[1, 1].plot(acc,'g',label='Training accuracy')
+    axs[1, 1].set_title('Train Accuracy')
+    #axs.set(xlabel='Epochs', ylabel='Accuracy')
+    fig.tight_layout()
+    plt.show()
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", type=str, help="where to save training outputs")
-    parser.add_argument("--data_dir", type=str, help="where the book dataset is stored")
+    parser.add_argument("--outputs_dir", type=str, help="where to save training outputs")
+    parser.add_argument("--embedding_dim", type=int, default=128)
+    parser.add_argument("--books_dir", type=str, help="where the book dataset is stored")
     parser.add_argument(
         "--downstream_eval",
         action="store_true",

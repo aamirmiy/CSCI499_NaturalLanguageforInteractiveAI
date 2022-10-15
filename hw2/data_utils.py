@@ -3,6 +3,7 @@ import re
 import json
 import gensim
 import tqdm
+import torch
 import numpy as np
 from collections import Counter
 from spacy.lang.en import English
@@ -85,21 +86,6 @@ def build_tokenizer_table(train, vocab_size):
     )
 
 
-def build_output_tables(train):
-    actions = set()
-    targets = set()
-    for episode in train:
-        for _, outseq in episode:
-            a, t = outseq
-            actions.add(a)
-            targets.add(t)
-    actions_to_index = {a: i for i, a in enumerate(actions)}
-    targets_to_index = {t: i for i, t in enumerate(targets)}
-    index_to_actions = {actions_to_index[a]: a for a in actions_to_index}
-    index_to_targets = {targets_to_index[t]: t for t in targets_to_index}
-    return actions_to_index, index_to_actions, targets_to_index, index_to_targets
-
-
 def read_analogies(analogies_fn):
     with open(analogies_fn, "r") as f:
         pairs = json.load(f)
@@ -124,7 +110,7 @@ def save_word2vec_format(fname, model, i2v):
 
 
 def encode_data(data, v2i, seq_len):
-    num_insts = sum([len(ep) for ep in data])
+    num_insts = len(data)
     x = np.zeros((num_insts, seq_len), dtype=np.int32)
     lens = np.zeros((num_insts, 1), dtype=np.int32)
 
@@ -159,3 +145,32 @@ def encode_data(data, v2i, seq_len):
     print("INFO: encoded %d sentences without regard to order" % idx)
 
     return x, lens
+
+
+def collate_cbow(batch,CBOW_N_WORDS,MAX_SEQUENCE_LENGTH):
+    batch_input, batch_output = [], [] #CBOW_N_WORDS is the context window
+    for text in batch:
+        text_tokens_ids = text
+
+        if len(text_tokens_ids) < CBOW_N_WORDS * 2 + 1:
+            continue
+
+        if MAX_SEQUENCE_LENGTH:
+            text_tokens_ids = text_tokens_ids[:MAX_SEQUENCE_LENGTH]
+
+        for idx in range(len(text_tokens_ids) - CBOW_N_WORDS * 2):
+            token_id_sequence = text_tokens_ids[idx : (idx + CBOW_N_WORDS * 2 + 1)]
+            output = token_id_sequence[CBOW_N_WORDS]
+            token_id_sequence = np.delete(token_id_sequence,CBOW_N_WORDS)
+            batch_input.append(token_id_sequence)
+            batch_output.append(output)
+
+    batch_input = torch.tensor(np.array(batch_input), dtype=torch.long)
+    batch_output = torch.tensor(np.array(batch_output), dtype=torch.long)
+    return batch_input, batch_output
+
+
+def train_val_split(encoded_sentences): #train_val split 80:20
+    train_set = encoded_sentences[:int(len(encoded_sentences)*0.8)]
+    val_set = encoded_sentences[int(len(encoded_sentences)*0.8):]
+    return train_set, val_set
